@@ -1,18 +1,24 @@
+import { useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { Container, Typography, Button, List, ListItem, ListItemText, ListItemAvatar, Avatar, IconButton, Box } from "@mui/material";
 import { Delete, Add, Remove, ShoppingCart } from "@mui/icons-material";
 import { toast } from "react-toastify";
-import { Product } from "../types/Product";
 import { AuthContext } from "../context/AuthContext";
-import { useContext } from "react";
-
+import { Product } from "../types/Product";
 
 const Cart = () => {
   const navigate = useNavigate();
-  const { cart, clearCartLocal, addToCartLocal, removeFromCartLocal, totalItems } = useCart();
+  const { cart, clearCartLocal, addToCartLocal, removeFromCartLocal, syncCartWithServer, totalItems } = useCart();
   const authContext = useContext(AuthContext);
   const user = authContext?.user;
+
+  useEffect(() => {
+    if (user) {
+      syncCartWithServer();
+    }
+  }, [user]);
+
   const handleIncrease = (product: Product) => {
     addToCartLocal(product, 1);
     toast.success(`Aumentaste la cantidad de ${product.name}`);
@@ -24,7 +30,6 @@ const Cart = () => {
       toast.warn("No puedes tener menos de 1 producto");
       return;
     }
-
     addToCartLocal(product, -1);
     toast.info(`Reduciste la cantidad de ${product.name}`);
   };
@@ -51,12 +56,7 @@ const Cart = () => {
           <Typography sx={{ mt: 2, fontSize: 18, fontWeight: "bold" }}>
             Tu carrito está vacío
           </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            sx={{ mt: 3 }}
-            onClick={() => navigate("/")}
-          >
+          <Button variant="contained" color="primary" sx={{ mt: 3 }} onClick={() => navigate("/")}>
             Ver Productos
           </Button>
         </Box>
@@ -68,10 +68,7 @@ const Cart = () => {
                 <ListItemAvatar>
                   <Avatar src={product.imageUrl} />
                 </ListItemAvatar>
-                <ListItemText 
-                  primary={product.name} 
-                  secondary={`Cantidad: ${quantity} - Precio Total: Q.${(product.price || 0) * quantity}`} 
-                />
+                <ListItemText primary={product.name} secondary={`Cantidad: ${quantity} - Precio Total: Q.${product.price * quantity}`} />
                 <IconButton onClick={() => handleDecrease(product)}><Remove /></IconButton>
                 <IconButton onClick={() => handleIncrease(product)}><Add /></IconButton>
                 <IconButton onClick={() => handleRemove(product.id)}><Delete /></IconButton>

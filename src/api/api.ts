@@ -29,6 +29,8 @@ export const getUser = (email: string) =>
 
 export const getProducts = () => axios.get(`${API_PRODUCT}/api/products`);
 
+export const getProduct = (id: number) => axios.get(`${API_PRODUCT}/api/products/${id}`);
+
 export const addToCart = (userEmail: string, productId: number, quantity: number) =>
   axios.post(
     `${API_CART}/api/cart/add?userEmail=${userEmail}&productId=${productId}&quantity=${quantity}`,
@@ -58,5 +60,11 @@ export const getCart = (userEmail: string) =>
     axios.post(
       `${API_ORDER}/api/orders/checkout`,
       orderData,
+      { headers: { ...getAuthHeaders() } }
+    );
+
+    export const getOrders = (userEmail: string) =>
+    axios.get(
+      `${API_ORDER}/api/orders?userEmail=${userEmail}`,
       { headers: { ...getAuthHeaders() } }
     );
